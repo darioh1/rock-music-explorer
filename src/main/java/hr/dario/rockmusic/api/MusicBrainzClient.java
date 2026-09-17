@@ -6,8 +6,12 @@ import java.net.http.HttpClient;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import hr.dario.rockmusic.model.Artist;
+import hr.dario.rockmusic.model.ArtistSearchResponse;
 
 public class MusicBrainzClient {
+    private final ObjectMapper objectMapper = new ObjectMapper();
     public void searchArtist(String artistName){
         String encodedArtistName = URLEncoder.encode(artistName, StandardCharsets.UTF_8);
         HttpClient client = HttpClient.newHttpClient();
@@ -26,7 +30,22 @@ public class MusicBrainzClient {
             );
 
             System.out.println("Status code: " + response.statusCode());
-            System.out.println(response.body());
+            ArtistSearchResponse searchResponse =
+                    objectMapper.readValue(
+                            response.body(),
+                            ArtistSearchResponse.class
+                    );
+
+            System.out.println("Found: " + searchResponse.getCount() + " artists");
+            System.out.println("Showing: " + searchResponse.getArtists().size() + " artists");
+
+            for (Artist artist : searchResponse.getArtists()) {
+                System.out.println(
+                        artist.getName() + " | "
+                                + artist.getType() + " | "
+                                + artist.getCountry()
+                );
+            }
 
         } catch (Exception e) {
             System.out.println("Error while contacting MusicBrainz.");
