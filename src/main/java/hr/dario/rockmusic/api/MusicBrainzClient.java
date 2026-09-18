@@ -12,7 +12,7 @@ import hr.dario.rockmusic.model.ArtistSearchResponse;
 
 public class MusicBrainzClient {
     private final ObjectMapper objectMapper = new ObjectMapper();
-    public void searchArtist(String artistName){
+    public ArtistSearchResponse searchArtist(String artistName){
         String encodedArtistName = URLEncoder.encode(artistName, StandardCharsets.UTF_8);
         HttpClient client = HttpClient.newHttpClient();
         String url = "https://musicbrainz.org/ws/2/artist/?query=artist:"
@@ -35,21 +35,11 @@ public class MusicBrainzClient {
                             response.body(),
                             ArtistSearchResponse.class
                     );
-
-            System.out.println("Found: " + searchResponse.getCount() + " artists");
-            System.out.println("Showing: " + searchResponse.getArtists().size() + " artists");
-
-            for (Artist artist : searchResponse.getArtists()) {
-                System.out.println(
-                        artist.getName() + " | "
-                                + artist.getType() + " | "
-                                + artist.getCountry()
-                );
-            }
-
+            return searchResponse;
         } catch (Exception e) {
             System.out.println("Error while contacting MusicBrainz.");
             e.printStackTrace();
+            return null;
         }
     }
 }

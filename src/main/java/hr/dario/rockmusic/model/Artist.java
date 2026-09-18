@@ -8,6 +8,7 @@ public class Artist {
     private String name;
     private String type;
     private String country;
+    private int score;
 
     public String getId() {
         return id;
@@ -39,5 +40,13 @@ public class Artist {
 
     public void setCountry(String country) {
         this.country = country;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
     }
 }
