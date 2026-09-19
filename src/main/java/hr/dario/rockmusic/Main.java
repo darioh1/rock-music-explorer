@@ -3,6 +3,8 @@ package hr.dario.rockmusic;
 import hr.dario.rockmusic.api.MusicBrainzClient;
 import hr.dario.rockmusic.model.Artist;
 import hr.dario.rockmusic.model.ArtistSearchResponse;
+import hr.dario.rockmusic.model.ReleaseGroup;
+import hr.dario.rockmusic.model.ReleaseGroupResponse;
 
 import java.util.Scanner;
 
@@ -19,6 +21,7 @@ public class Main {
         System.out.println("Searching for: " + artistName);
         MusicBrainzClient client = new MusicBrainzClient();
         ArtistSearchResponse response = client.searchArtist(artistName);
+        Artist selectedArtist = null;
         if (response != null) {
             System.out.println("Found: " + response.getCount() + " artists");
             //System.out.println("Showing: " + response.getArtists().size() + " artists");
@@ -38,9 +41,9 @@ public class Main {
             int choice;
             while (true) {
                 System.out.println("Choose artist [1-" + numberOfResults + "]: ");
-                if (scanner.hasNextInt()){
+                if (scanner.hasNextInt()) {
                     choice = scanner.nextInt();
-                    if (choice <= numberOfResults && choice >= 1){
+                    if (choice <= numberOfResults && choice >= 1) {
                         break;
                     } else {
                         System.out.println("Please chose a number between 1 and " + numberOfResults + ".");
@@ -51,11 +54,24 @@ public class Main {
                 }
             }
 
-            Artist selectedArtist = response.getArtists().get(choice - 1);
+            selectedArtist = response.getArtists().get(choice - 1);
             System.out.println("Selected artist: " + selectedArtist.getName());
             System.out.println("MusicBrainz ID: " + selectedArtist.getId());
+        } else {
+            System.out.println("Error");
         }
-        else {
+        ReleaseGroupResponse albumsResponse = client.getAlbumsByArtist(selectedArtist.getId());
+        if (albumsResponse != null){
+            System.out.println();
+            System.out.println("Albums: ");
+            System.out.println();
+            for (ReleaseGroup album : albumsResponse.getReleaseGroups()){
+                System.out.println(
+                        album.getTitle() + " | "
+                        + album.getFirstReleaseDate()
+                );
+            }
+        } else {
             System.out.println("Error");
         }
     }
