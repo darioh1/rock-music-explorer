@@ -29,7 +29,7 @@ public class MusicBrainzClient {
                     HttpResponse.BodyHandlers.ofString()
             );
 
-            System.out.println("Status code: " + response.statusCode());
+            //System.out.println("Status code: " + response.statusCode());
             ArtistSearchResponse searchResponse =
                     objectMapper.readValue(
                             response.body(),
@@ -57,8 +57,7 @@ public class MusicBrainzClient {
                     request,
                     HttpResponse.BodyHandlers.ofString()
             );
-            System.out.println("Status code: " + response.statusCode());
-            System.out.println();
+            //System.out.println("Status code: " + response.statusCode());
             ReleaseGroupResponse releaseGroupResponse =
                     objectMapper.readValue(
                             response.body(),
