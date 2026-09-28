@@ -6,6 +6,8 @@ import java.net.http.HttpClient;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.io.IOException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hr.dario.rockmusic.model.ArtistSearchResponse;
 import hr.dario.rockmusic.model.ReleaseGroupResponse;
@@ -28,17 +30,23 @@ public class MusicBrainzClient {
                     request,
                     HttpResponse.BodyHandlers.ofString()
             );
-
-            //System.out.println("Status code: " + response.statusCode());
+            if (response.statusCode() != 200) {
+                System.out.println("MusicBrainz returned status code: " + response.statusCode());
+                return null;
+            }
             ArtistSearchResponse searchResponse =
                     objectMapper.readValue(
                             response.body(),
                             ArtistSearchResponse.class
                     );
             return searchResponse;
-        } catch (Exception e) {
-            System.out.println("Error while contacting MusicBrainz.");
+        } catch (IOException e) {
+            System.out.println("Error while contacting or reading data from MusicBrainz.");
             e.printStackTrace();
+            return null;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            System.out.println("Request to MusicBrainz was interrupted.");
             return null;
         }
     }
@@ -57,16 +65,23 @@ public class MusicBrainzClient {
                     request,
                     HttpResponse.BodyHandlers.ofString()
             );
-            //System.out.println("Status code: " + response.statusCode());
+            if (response.statusCode() != 200) {
+                System.out.println("MusicBrainz returned status code: " + response.statusCode());
+                return null;
+            }
             ReleaseGroupResponse releaseGroupResponse =
                     objectMapper.readValue(
                             response.body(),
                             ReleaseGroupResponse.class
                     );
             return releaseGroupResponse;
-        } catch (Exception e) {
-            System.out.println("Error while contacting MusicBrainz.");
+        } catch (IOException e) {
+            System.out.println("Error while contacting or reading data from MusicBrainz.");
             e.printStackTrace();
+            return null;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            System.out.println("Request to MusicBrainz was interrupted.");
             return null;
         }
     }

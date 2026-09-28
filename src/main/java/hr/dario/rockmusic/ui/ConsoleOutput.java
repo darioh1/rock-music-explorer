@@ -70,6 +70,14 @@ public class ConsoleOutput {
         System.out.println("Error");
     }
 
+    public void printNoArtistsFound() {
+        System.out.println("No artists found.");
+    }
+
+    public void printNoAlbumsFound(){
+        System.out.println("No albums found.");
+    }
+
     public void printAlbumsPrompt (){
         System.out.println();
         System.out.println("1. Regular albums");
