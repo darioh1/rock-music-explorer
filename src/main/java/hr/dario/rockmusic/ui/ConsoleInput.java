@@ -3,6 +3,9 @@ package hr.dario.rockmusic.ui;
 import java.util.Scanner;
 
 public class ConsoleInput {
+    public String readArtistName(Scanner scanner) {
+        return scanner.nextLine();
+    }
     public int readChoice(Scanner scanner, int min, int max) {
         int choice;
         if (min == max){
