@@ -27,42 +27,50 @@ public class Main {
         consoleOutput.printSearchingForArtist(artistName);
 
         ArtistSearchResponse response = client.searchArtist(artistName);
-        Artist selectedArtist = null;
-        if (response != null) {
-            consoleOutput.printFoundArtists(response.getCount());
-
-            int numberOfResults = Math.min(5, response.getArtists().size());
-
-            consoleOutput.printArtists(response.getArtists(), numberOfResults);
-
-            int choice = consoleInput.readChoice(scanner, 1, numberOfResults);
-
-            selectedArtist = response.getArtists().get(choice - 1);
-
-            consoleOutput.printSelectedArtist(selectedArtist);
-        } else {
+        if (response == null) {
             consoleOutput.printError();
+            return;
         }
+        if (response.getArtists() == null || response.getArtists().isEmpty()){
+            consoleOutput.printNoArtistsFound();
+            return;
+        }
+        consoleOutput.printFoundArtists(response.getCount());
+
+        int numberOfResults = Math.min(5, response.getArtists().size());
+
+        consoleOutput.printArtists(response.getArtists(), numberOfResults);
+
+        int artistChoice = consoleInput.readChoice(scanner, 1, numberOfResults);
+
+        Artist selectedArtist = response.getArtists().get(artistChoice - 1);
+
+        consoleOutput.printSelectedArtist(selectedArtist);
+
         ReleaseGroupResponse albumsResponse = client.getAlbumsByArtist(selectedArtist.getId());
-        if (albumsResponse != null){
-            List<ReleaseGroup> albums = albumsResponse.getReleaseGroups();
-            albums.sort(
-                    Comparator.comparing(
-                            ReleaseGroup::getFirstReleaseDate,
-                            Comparator.nullsLast(Comparator.naturalOrder())
-                    )
-            );
-            consoleOutput.printAlbumsPrompt();
-
-            int choice = consoleInput.readChoice(scanner, 1, 2);
-
-            if (choice == 1){
-                consoleOutput.printRegularAlbums(albums, selectedArtist);
-            } else {
-                consoleOutput.printAllAlbums(albums, selectedArtist);
-            }
-        } else {
+        if (albumsResponse == null) {
             consoleOutput.printError();
+            return;
+        }
+        if (albumsResponse.getReleaseGroups() == null || albumsResponse.getReleaseGroups().isEmpty()){
+            consoleOutput.printNoAlbumsFound();
+            return;
+        }
+        List<ReleaseGroup> albums = albumsResponse.getReleaseGroups();
+        albums.sort(
+                Comparator.comparing(
+                        ReleaseGroup::getFirstReleaseDate,
+                        Comparator.nullsLast(Comparator.naturalOrder())
+                )
+        );
+        consoleOutput.printAlbumsPrompt();
+
+        int albumsChoice = consoleInput.readChoice(scanner, 1, 2);
+
+        if (albumsChoice == 1){
+            consoleOutput.printRegularAlbums(albums, selectedArtist);
+        } else {
+            consoleOutput.printAllAlbums(albums, selectedArtist);
         }
     }
 }
