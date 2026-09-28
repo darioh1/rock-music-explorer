@@ -84,36 +84,9 @@ public class ConsoleOutput {
         System.out.println("2. All albums");
     }
 
-    public void printRegularAlbums(List<ReleaseGroup> albums, Artist selectedArtist) {
+    public void printAlbums(List<ReleaseGroup> albums, Artist selectedArtist, String albumType) {
         System.out.println();
-        System.out.println("Regular albums of " + selectedArtist.getName() + ":");
-        System.out.println();
-        int maxTitleLength = 0;
-        for (ReleaseGroup album : albums) {
-            if (album.getSecondaryTypes() != null && album.getSecondaryTypes().contains("Compilation")) {
-                continue;
-            }
-            if (album.getTitle().length() > maxTitleLength) {
-                maxTitleLength = album.getTitle().length();
-            }
-        }
-        for (ReleaseGroup album : albums) {
-            if (album.getSecondaryTypes() != null && album.getSecondaryTypes().contains("Compilation")) {
-                continue;
-            } else {
-                String releaseDate = album.getFirstReleaseDate() != null
-                        ? album.getFirstReleaseDate() : "Unknown";
-                System.out.printf(
-                        "%-" + maxTitleLength + "s | %s%n",
-                        album.getTitle(),
-                        releaseDate
-                );
-            }
-        }
-    }
-    public void printAllAlbums(List<ReleaseGroup> albums, Artist selectedArtist) {
-        System.out.println();
-        System.out.println("All albums of " + selectedArtist.getName() + ":");
+        System.out.println(albumType + " albums of " + selectedArtist.getName() + ":");
         System.out.println();
         int maxTitleLength = 0;
         for (ReleaseGroup album : albums) {
