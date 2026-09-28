@@ -5,11 +5,11 @@ import hr.dario.rockmusic.model.Artist;
 import hr.dario.rockmusic.model.ArtistSearchResponse;
 import hr.dario.rockmusic.model.ReleaseGroup;
 import hr.dario.rockmusic.model.ReleaseGroupResponse;
+import hr.dario.rockmusic.service.AlbumService;
 import hr.dario.rockmusic.ui.ConsoleInput;
 import hr.dario.rockmusic.ui.ConsoleOutput;
 
 import java.util.Scanner;
-import java.util.Comparator;
 import java.util.List;
 
 public class Main {
@@ -18,6 +18,7 @@ public class Main {
         MusicBrainzClient client = new MusicBrainzClient();
         ConsoleInput consoleInput = new ConsoleInput();
         ConsoleOutput consoleOutput = new ConsoleOutput();
+        AlbumService albumService = new AlbumService();
 
         consoleOutput.printStart();
         consoleOutput.printArtistPrompt();
@@ -57,20 +58,17 @@ public class Main {
             return;
         }
         List<ReleaseGroup> albums = albumsResponse.getReleaseGroups();
-        albums.sort(
-                Comparator.comparing(
-                        ReleaseGroup::getFirstReleaseDate,
-                        Comparator.nullsLast(Comparator.naturalOrder())
-                )
-        );
+        albumService.sortByReleaseDate(albums);
         consoleOutput.printAlbumsPrompt();
 
         int albumsChoice = consoleInput.readChoice(scanner, 1, 2);
 
         if (albumsChoice == 1){
-            consoleOutput.printRegularAlbums(albums, selectedArtist);
+            List<ReleaseGroup> regularAlbums = albumService.getRegularAlbums(albums);
+
+            consoleOutput.printAlbums(regularAlbums, selectedArtist, "Regular");
         } else {
-            consoleOutput.printAllAlbums(albums, selectedArtist);
+            consoleOutput.printAlbums(albums, selectedArtist, "All");
         }
     }
 }
