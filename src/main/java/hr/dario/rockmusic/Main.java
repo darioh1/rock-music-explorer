@@ -8,9 +8,13 @@ import hr.dario.rockmusic.model.ReleaseGroupResponse;
 import hr.dario.rockmusic.service.AlbumService;
 import hr.dario.rockmusic.ui.ConsoleInput;
 import hr.dario.rockmusic.ui.ConsoleOutput;
+import hr.dario.rockmusic.database.DatabaseConnection;
+import hr.dario.rockmusic.repository.ArtistRepository;
 
 import java.util.Scanner;
 import java.util.List;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public class Main {
     public static void main(String[] args) {
@@ -19,6 +23,14 @@ public class Main {
         ConsoleInput consoleInput = new ConsoleInput();
         ConsoleOutput consoleOutput = new ConsoleOutput();
         AlbumService albumService = new AlbumService();
+        ArtistRepository artistRepository = new ArtistRepository();
+
+        try (Connection connection = DatabaseConnection.getConnection()) {
+            consoleOutput.printDatabaseSuccessful();
+        } catch (SQLException e) {
+            consoleOutput.printDatabaseFail();
+            e.printStackTrace();
+        }
 
         consoleOutput.printStart();
         consoleOutput.printArtistPrompt();
@@ -42,9 +54,21 @@ public class Main {
 
         consoleOutput.printArtists(response.getArtists(), numberOfResults);
 
-        int artistChoice = consoleInput.readChoice(scanner, 1, numberOfResults);
+        int artistChoice = consoleInput.readChoice(scanner, 1, numberOfResults, "artist");
 
         Artist selectedArtist = response.getArtists().get(artistChoice - 1);
+
+        try (Connection connection = DatabaseConnection.getConnection()){
+            boolean artistSaved = artistRepository.save(connection, selectedArtist);
+            if (artistSaved) {
+                consoleOutput.printArtistSaved();
+            } else {
+                consoleOutput.printArtistAlreadyExists();
+            }
+        } catch (SQLException e) {
+            consoleOutput.printArtistSaveFailed();
+            e.printStackTrace();
+        }
 
         consoleOutput.printSelectedArtist(selectedArtist);
 
@@ -61,7 +85,7 @@ public class Main {
         albumService.sortByReleaseDate(albums);
         consoleOutput.printAlbumsPrompt();
 
-        int albumsChoice = consoleInput.readChoice(scanner, 1, 2);
+        int albumsChoice = consoleInput.readChoice(scanner, 1, 2, "album option");
 
         if (albumsChoice == 1){
             List<ReleaseGroup> regularAlbums = albumService.getRegularAlbums(albums);
