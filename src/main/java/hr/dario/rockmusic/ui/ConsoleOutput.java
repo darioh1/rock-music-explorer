@@ -130,4 +130,9 @@ public class ConsoleOutput {
         System.out.println("Artist already exists in database.");
         System.out.println();
     }
+
+    public void printAlbumsSaved(int savedAlbums){
+        System.out.println("New albums saved: " + savedAlbums);
+        System.out.println();
+    }
 }

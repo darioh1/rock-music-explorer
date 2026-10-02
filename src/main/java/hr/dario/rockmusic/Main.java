@@ -10,6 +10,7 @@ import hr.dario.rockmusic.ui.ConsoleInput;
 import hr.dario.rockmusic.ui.ConsoleOutput;
 import hr.dario.rockmusic.database.DatabaseConnection;
 import hr.dario.rockmusic.repository.ArtistRepository;
+import hr.dario.rockmusic.repository.AlbumRepository;
 
 import java.util.Scanner;
 import java.util.List;
@@ -24,6 +25,7 @@ public class Main {
         ConsoleOutput consoleOutput = new ConsoleOutput();
         AlbumService albumService = new AlbumService();
         ArtistRepository artistRepository = new ArtistRepository();
+        AlbumRepository albumRepository = new AlbumRepository();
 
         try (Connection connection = DatabaseConnection.getConnection()) {
             consoleOutput.printDatabaseSuccessful();
@@ -58,17 +60,7 @@ public class Main {
 
         Artist selectedArtist = response.getArtists().get(artistChoice - 1);
 
-        try (Connection connection = DatabaseConnection.getConnection()){
-            boolean artistSaved = artistRepository.save(connection, selectedArtist);
-            if (artistSaved) {
-                consoleOutput.printArtistSaved();
-            } else {
-                consoleOutput.printArtistAlreadyExists();
-            }
-        } catch (SQLException e) {
-            consoleOutput.printArtistSaveFailed();
-            e.printStackTrace();
-        }
+
 
         consoleOutput.printSelectedArtist(selectedArtist);
 
@@ -82,6 +74,32 @@ public class Main {
             return;
         }
         List<ReleaseGroup> albums = albumsResponse.getReleaseGroups();
+
+        try (Connection connection = DatabaseConnection.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                boolean artistSaved = artistRepository.save(connection, selectedArtist);
+                int savedAlbums = albumRepository.saveAll(connection, albums, selectedArtist.getId());
+
+                connection.commit();
+
+                if (artistSaved) {
+                    consoleOutput.printArtistSaved();
+                } else {
+                    consoleOutput.printArtistAlreadyExists();
+                }
+                consoleOutput.printAlbumsSaved(savedAlbums);
+
+            } catch (SQLException e) {
+                connection.rollback();
+                consoleOutput.printArtistSaveFailed();
+                e.printStackTrace();
+            }
+        } catch (SQLException e) {
+            consoleOutput.printDatabaseFail();
+            e.printStackTrace();
+        }
+
         albumService.sortByReleaseDate(albums);
         consoleOutput.printAlbumsPrompt();
 
