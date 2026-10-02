@@ -8,13 +8,11 @@ import hr.dario.rockmusic.model.ReleaseGroupResponse;
 import hr.dario.rockmusic.service.AlbumService;
 import hr.dario.rockmusic.ui.ConsoleInput;
 import hr.dario.rockmusic.ui.ConsoleOutput;
-import hr.dario.rockmusic.database.DatabaseConnection;
-import hr.dario.rockmusic.repository.ArtistRepository;
-import hr.dario.rockmusic.repository.AlbumRepository;
+import hr.dario.rockmusic.service.DatabaseService;
+import hr.dario.rockmusic.service.SaveResult;
 
 import java.util.Scanner;
 import java.util.List;
-import java.sql.Connection;
 import java.sql.SQLException;
 
 public class Main {
@@ -24,15 +22,7 @@ public class Main {
         ConsoleInput consoleInput = new ConsoleInput();
         ConsoleOutput consoleOutput = new ConsoleOutput();
         AlbumService albumService = new AlbumService();
-        ArtistRepository artistRepository = new ArtistRepository();
-        AlbumRepository albumRepository = new AlbumRepository();
-
-        try (Connection connection = DatabaseConnection.getConnection()) {
-            consoleOutput.printDatabaseSuccessful();
-        } catch (SQLException e) {
-            consoleOutput.printDatabaseFail();
-            e.printStackTrace();
-        }
+        DatabaseService databaseService = new DatabaseService();
 
         consoleOutput.printStart();
         consoleOutput.printArtistPrompt();
@@ -60,8 +50,6 @@ public class Main {
 
         Artist selectedArtist = response.getArtists().get(artistChoice - 1);
 
-
-
         consoleOutput.printSelectedArtist(selectedArtist);
 
         ReleaseGroupResponse albumsResponse = client.getAlbumsByArtist(selectedArtist.getId());
@@ -75,28 +63,18 @@ public class Main {
         }
         List<ReleaseGroup> albums = albumsResponse.getReleaseGroups();
 
-        try (Connection connection = DatabaseConnection.getConnection()) {
-            connection.setAutoCommit(false);
-            try {
-                boolean artistSaved = artistRepository.save(connection, selectedArtist);
-                int savedAlbums = albumRepository.saveAll(connection, albums, selectedArtist.getId());
+        try {
+            SaveResult result = databaseService.saveArtistWithAlbums(selectedArtist, albums);
 
-                connection.commit();
-
-                if (artistSaved) {
-                    consoleOutput.printArtistSaved();
-                } else {
-                    consoleOutput.printArtistAlreadyExists();
-                }
-                consoleOutput.printAlbumsSaved(savedAlbums);
-
-            } catch (SQLException e) {
-                connection.rollback();
-                consoleOutput.printArtistSaveFailed();
-                e.printStackTrace();
+            if (result.artistSaved()) {
+                consoleOutput.printArtistSaved();
+            } else {
+                consoleOutput.printArtistAlreadyExists();
             }
+
+            consoleOutput.printAlbumsSaved(result.savedAlbums());
         } catch (SQLException e) {
-            consoleOutput.printDatabaseFail();
+            consoleOutput.printArtistSaveFailed();
             e.printStackTrace();
         }
 

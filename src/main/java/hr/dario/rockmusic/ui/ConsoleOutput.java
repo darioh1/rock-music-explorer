@@ -133,6 +133,5 @@ public class ConsoleOutput {
 
     public void printAlbumsSaved(int savedAlbums){
         System.out.println("New albums saved: " + savedAlbums);
-        System.out.println();
     }
 }
