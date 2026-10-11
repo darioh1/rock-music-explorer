@@ -39,4 +39,10 @@ public class DatabaseService {
             }
         }
     }
+
+    public List<Artist> searchSavedArtists(String name) throws SQLException {
+        try (Connection connection = DatabaseConnection.getConnection()){
+            return artistRepository.findByName(connection, name);
+        }
+    }
 }
