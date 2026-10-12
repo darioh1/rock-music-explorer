@@ -3,6 +3,7 @@ package hr.dario.rockmusic.repository;
 import hr.dario.rockmusic.model.ReleaseGroup;
 
 import java.sql.*;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -51,11 +52,35 @@ public class AlbumRepository {
         List<ReleaseGroup> albums = new ArrayList<>();
 
         String sql = """
-                SELECT id, title, first_release_date, primary_type
+                SELECT id, title, first_release_date, primary_type, secondary_types
                 FROM albums
                 WHERE artist_id = ?
                 ORDER BY first_release_date
                 """;
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, artistId);
+
+            try (ResultSet resultSet = statement.executeQuery()){
+                while (resultSet.next()){
+                    ReleaseGroup album = new ReleaseGroup();
+                    album.setId(resultSet.getString("id"));
+                    album.setTitle(resultSet.getString("title"));
+                    album.setFirstReleaseDate(resultSet.getString("first_release_date"));
+                    album.setPrimaryType(resultSet.getString("primary_type"));
+                    Array sqlArray = resultSet.getArray("secondary_types");
+
+                    if (sqlArray != null) {
+                        String[] types = (String[]) sqlArray.getArray();
+                        album.setSecondaryTypes(Arrays.asList(types));
+                        sqlArray.free();
+
+                    }
+
+                    albums.add(album);
+                }
+            }
+        }
         return albums;
     }
 }

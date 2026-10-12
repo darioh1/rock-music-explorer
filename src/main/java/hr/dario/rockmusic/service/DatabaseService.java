@@ -45,4 +45,10 @@ public class DatabaseService {
             return artistRepository.findByName(connection, name);
         }
     }
+
+    public List<ReleaseGroup> getSavedAlbums(String artistId) throws SQLException{
+        try (Connection connection = DatabaseConnection.getConnection()) {
+            return albumRepository.findByArtistId(connection, artistId);
+        }
+    }
 }
