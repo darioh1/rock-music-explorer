@@ -9,7 +9,13 @@ public class DatabaseConnection {
             "jdbc:postgresql://localhost:5432/rock_music_explorer";
     private static final String USER = System.getenv("DB_USER");
     private static final String PASSWORD = System.getenv("DB_PASSWORD");
+
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASSWORD);
+    }
+
+    public static Connection getTestConnection() throws SQLException {
+        String url = "jdbc:postgresql://localhost:5432/rock_music_explorer_test";
+        return DriverManager.getConnection(url, USER, PASSWORD);
     }
 }

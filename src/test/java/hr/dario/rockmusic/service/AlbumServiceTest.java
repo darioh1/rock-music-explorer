@@ -3,6 +3,7 @@ package hr.dario.rockmusic.service;
 import hr.dario.rockmusic.model.ReleaseGroup;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,5 +41,30 @@ class AlbumServiceTest {
 
         assertEquals(1, result.size());
         assertEquals("Animals", result.getFirst().getTitle());
+    }
+
+    @Test
+    void shouldSortAlbumsByReleaseDate() {
+        AlbumService albumService = new AlbumService();
+
+        ReleaseGroup theWall = new ReleaseGroup();
+        theWall.setTitle("The Wall");
+        theWall.setFirstReleaseDate("1979-11-30");
+
+        ReleaseGroup animals = new ReleaseGroup();
+        animals.setTitle("Animals");
+        animals.setFirstReleaseDate("1977-01-21");
+
+        ReleaseGroup unknown = new ReleaseGroup();
+        unknown.setTitle("Unknown Album");
+        unknown.setFirstReleaseDate(null);
+
+        List<ReleaseGroup> albums = new ArrayList<>(List.of(theWall, unknown, animals));
+        albumService.sortByReleaseDate(albums);
+
+        assertEquals(3, albums.size());
+        assertEquals("Animals", albums.getFirst().getTitle());
+        assertEquals("The Wall", albums.get(1).getTitle());
+        assertEquals("Unknown Album", albums.getLast().getTitle());
     }
 }
