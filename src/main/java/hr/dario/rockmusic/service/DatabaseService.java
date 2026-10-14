@@ -28,6 +28,7 @@ public class DatabaseService {
             try {
                 boolean artistSaved = artistRepository.save(connection, artist);
                 int savedAlbums = albumRepository.saveAll(connection, albums, artist.getId());
+                artistRepository.markAlbumsFetched(connection, artist.getId());
 
                 connection.commit();
 
@@ -49,6 +50,12 @@ public class DatabaseService {
     public List<ReleaseGroup> getSavedAlbums(String artistId) throws SQLException{
         try (Connection connection = DatabaseConnection.getConnection()) {
             return albumRepository.findByArtistId(connection, artistId);
+        }
+    }
+
+    public boolean areAlbumsFetched(String artistId) throws SQLException {
+        try (Connection connection = DatabaseConnection.getConnection()) {
+            return artistRepository.areAlbumsFetched(connection, artistId);
         }
     }
 }

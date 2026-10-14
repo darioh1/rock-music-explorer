@@ -50,6 +50,7 @@ public class MusicBrainzClient {
             return null;
         }
     }
+
     public ReleaseGroupResponse getAlbumsByArtist(String artistId){
         String encodedArtistId = URLEncoder.encode(artistId, StandardCharsets.UTF_8);
         String url = "https://musicbrainz.org/ws/2/release-group?artist="

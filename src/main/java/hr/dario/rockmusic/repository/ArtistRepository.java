@@ -55,4 +55,35 @@ public class ArtistRepository {
         }
         return artists;
     }
+
+    public void markAlbumsFetched(Connection connection, String artistId)
+            throws SQLException {
+        String sql = """
+                UPDATE artists
+                SET albums_fetched = TRUE
+                WHERE id = ?
+                """;
+        try (PreparedStatement statement = connection.prepareStatement(sql)){
+            statement.setString(1, artistId);
+            statement.executeUpdate();
+        }
+    }
+
+    public boolean areAlbumsFetched(Connection connection, String artistId)
+            throws SQLException {
+        String sql = """
+            SELECT albums_fetched
+            FROM artists
+            WHERE id = ?
+            """;
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, artistId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getBoolean("albums_fetched");
+                }
+            }
+        }
+        return false;
+    }
 }

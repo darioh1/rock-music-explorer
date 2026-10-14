@@ -2,7 +2,8 @@ CREATE TABLE IF NOT EXISTS artists (
     id VARCHAR(36) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     type VARCHAR(50),
-    country VARCHAR(20)
+    country VARCHAR(20),
+    albums_fetched BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE IF NOT EXISTS albums (
