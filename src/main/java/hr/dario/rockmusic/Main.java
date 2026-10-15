@@ -4,16 +4,17 @@ import hr.dario.rockmusic.api.MusicBrainzClient;
 import hr.dario.rockmusic.model.Artist;
 import hr.dario.rockmusic.model.ArtistSearchResponse;
 import hr.dario.rockmusic.model.ReleaseGroup;
-import hr.dario.rockmusic.model.ReleaseGroupResponse;
 import hr.dario.rockmusic.service.AlbumService;
 import hr.dario.rockmusic.ui.ConsoleInput;
 import hr.dario.rockmusic.ui.ConsoleOutput;
 import hr.dario.rockmusic.service.DatabaseService;
-import hr.dario.rockmusic.service.SaveResult;
+import hr.dario.rockmusic.service.AlbumPaginationService;
+import hr.dario.rockmusic.service.MusicService;
 
 import java.util.Scanner;
 import java.util.List;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args) {
@@ -23,6 +24,8 @@ public class Main {
         ConsoleOutput consoleOutput = new ConsoleOutput();
         AlbumService albumService = new AlbumService();
         DatabaseService databaseService = new DatabaseService();
+        AlbumPaginationService paginationService = new AlbumPaginationService(client);
+        MusicService musicService = new MusicService(databaseService, paginationService);
 
         consoleOutput.printStart();
         consoleOutput.printArtistPrompt();
@@ -52,32 +55,27 @@ public class Main {
 
         consoleOutput.printSelectedArtist(selectedArtist);
 
-        ReleaseGroupResponse albumsResponse = client.getAlbumsByArtist(selectedArtist.getId(), 100, 0);
-        if (albumsResponse == null) {
-            consoleOutput.printError();
-            return;
-        }
-        if (albumsResponse.getReleaseGroups() == null || albumsResponse.getReleaseGroups().isEmpty()){
-            consoleOutput.printNoAlbumsFound();
-            return;
-        }
-        List<ReleaseGroup> albums = albumsResponse.getReleaseGroups();
+        List<ReleaseGroup> albums;
 
         try {
-            SaveResult result = databaseService.saveArtistWithAlbums(selectedArtist, albums);
-
-            if (result.artistSaved()) {
-                consoleOutput.printArtistSaved();
-            } else {
-                consoleOutput.printArtistAlreadyExists();
-            }
-
-            consoleOutput.printAlbumsSaved(result.savedAlbums());
+            albums = musicService.getAlbumsForArtist(selectedArtist);
         } catch (SQLException e) {
             consoleOutput.printArtistSaveFailed();
             e.printStackTrace();
+            return;
         }
 
+        if (albums == null) {
+            consoleOutput.printError();
+            return;
+        }
+
+        if (albums.isEmpty()) {
+            consoleOutput.printNoAlbumsFound();
+            return;
+        }
+
+        albums = new ArrayList<>(albums);
         albumService.sortByReleaseDate(albums);
         consoleOutput.printAlbumsPrompt();
 

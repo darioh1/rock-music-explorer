@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class AlbumService {
+
     public void sortByReleaseDate(List<ReleaseGroup> albums) {
         albums.sort(
                 Comparator.comparing(
@@ -15,6 +16,7 @@ public class AlbumService {
                 )
         );
     }
+
     public List<ReleaseGroup> getRegularAlbums(List<ReleaseGroup> albums) {
         List<ReleaseGroup> regularAlbums = new ArrayList<>();
         for (ReleaseGroup album : albums) {
