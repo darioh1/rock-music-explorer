@@ -7,9 +7,12 @@ import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hr.dario.rockmusic.model.ArtistSearchResponse;
+import hr.dario.rockmusic.model.ReleaseGroup;
 import hr.dario.rockmusic.model.ReleaseGroupResponse;
 
 public class MusicBrainzClient {
@@ -51,11 +54,13 @@ public class MusicBrainzClient {
         }
     }
 
-    public ReleaseGroupResponse getAlbumsByArtist(String artistId){
+    public ReleaseGroupResponse getAlbumsByArtist(String artistId, int limit, int offset){
         String encodedArtistId = URLEncoder.encode(artistId, StandardCharsets.UTF_8);
         String url = "https://musicbrainz.org/ws/2/release-group?artist="
                 + encodedArtistId
-                + "&type=album&fmt=json";
+                + "&type=album&fmt=json"
+                + "&limit=" + limit
+                + "&offset=" + offset;
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .header("User-Agent", "RockMusicExplorer/1.0")

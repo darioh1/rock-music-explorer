@@ -52,7 +52,7 @@ public class Main {
 
         consoleOutput.printSelectedArtist(selectedArtist);
 
-        ReleaseGroupResponse albumsResponse = client.getAlbumsByArtist(selectedArtist.getId());
+        ReleaseGroupResponse albumsResponse = client.getAlbumsByArtist(selectedArtist.getId(), 100, 0);
         if (albumsResponse == null) {
             consoleOutput.printError();
             return;
