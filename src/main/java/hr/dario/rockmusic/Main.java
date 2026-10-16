@@ -4,12 +4,9 @@ import hr.dario.rockmusic.api.MusicBrainzClient;
 import hr.dario.rockmusic.model.Artist;
 import hr.dario.rockmusic.model.ArtistSearchResponse;
 import hr.dario.rockmusic.model.ReleaseGroup;
-import hr.dario.rockmusic.service.AlbumService;
+import hr.dario.rockmusic.service.*;
 import hr.dario.rockmusic.ui.ConsoleInput;
 import hr.dario.rockmusic.ui.ConsoleOutput;
-import hr.dario.rockmusic.service.DatabaseService;
-import hr.dario.rockmusic.service.AlbumPaginationService;
-import hr.dario.rockmusic.service.MusicService;
 
 import java.util.Scanner;
 import java.util.List;
@@ -55,20 +52,23 @@ public class Main {
 
         consoleOutput.printSelectedArtist(selectedArtist);
 
-        List<ReleaseGroup> albums;
+        AlbumLoadResult result;
 
         try {
-            albums = musicService.getAlbumsForArtist(selectedArtist);
+            result = musicService.getAlbumsForArtist(selectedArtist);
         } catch (SQLException e) {
             consoleOutput.printArtistSaveFailed();
             e.printStackTrace();
             return;
         }
 
-        if (albums == null) {
+        if (result == null) {
             consoleOutput.printError();
             return;
         }
+
+        List<ReleaseGroup> albums = result.albums();
+        consoleOutput.printAlbumSource(result.source());
 
         if (albums.isEmpty()) {
             consoleOutput.printNoAlbumsFound();

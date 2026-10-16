@@ -17,13 +17,16 @@ public class MusicService {
         this.paginationService = paginationService;
     }
 
-    public List<ReleaseGroup> getAlbumsForArtist(Artist artist)
+    public AlbumLoadResult getAlbumsForArtist(Artist artist)
             throws SQLException {
 
         String artistId = artist.getId();
 
         if (databaseService.areAlbumsFetched(artistId)) {
-            return databaseService.getSavedAlbums(artistId);
+            List<ReleaseGroup> albums =
+                    databaseService.getSavedAlbums(artistId);
+
+            return new AlbumLoadResult(albums, AlbumSource.DATABASE);
         }
 
         ReleaseGroupResponse response = paginationService.getAllAlbumsByArtist(artistId);
@@ -35,6 +38,6 @@ public class MusicService {
 
         List<ReleaseGroup> albums = response.getReleaseGroups();
         databaseService.saveArtistWithAlbums(artist, albums);
-        return albums;
+        return new AlbumLoadResult(albums, AlbumSource.MUSICBRAINZ);
     }
 }

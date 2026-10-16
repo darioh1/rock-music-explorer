@@ -2,6 +2,7 @@ package hr.dario.rockmusic.ui;
 
 import hr.dario.rockmusic.model.Artist;
 import hr.dario.rockmusic.model.ReleaseGroup;
+import hr.dario.rockmusic.service.AlbumSource;
 
 import java.util.List;
 
@@ -106,32 +107,16 @@ public class ConsoleOutput {
         }
     }
 
-    public void printDatabaseSuccessful(){
-        System.out.println("Database connection successful!");
-        System.out.println();
-    }
-
-    public void printDatabaseFail(){
-        System.out.println("Database connection failed!");
-        System.out.println();
-    }
-
-    public void printArtistSaved(){
-        System.out.println("Artist saved to database!");
-        System.out.println();
-    }
-
     public void printArtistSaveFailed(){
         System.out.println("Failed to save artist to database!");
         System.out.println();
     }
 
-    public void printArtistAlreadyExists(){
-        System.out.println("Artist already exists in database.");
-        System.out.println();
-    }
-
-    public void printAlbumsSaved(int savedAlbums){
-        System.out.println("New albums saved: " + savedAlbums);
+    public void printAlbumSource(AlbumSource source) {
+        if (source == AlbumSource.DATABASE) {
+            System.out.println("Albums loaded from PostgreSQL database.");
+        } else if (source == AlbumSource.MUSICBRAINZ) {
+            System.out.println("Albums fetched from MusicBrainz and saved to database.");
+        }
     }
 }

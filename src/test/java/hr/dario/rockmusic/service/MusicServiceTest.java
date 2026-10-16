@@ -29,10 +29,10 @@ class MusicServiceTest {
         when(databaseService.areAlbumsFetched("artist-123")).thenReturn(true);
         when(databaseService.getSavedAlbums("artist-123")).thenReturn(savedAlbums);
 
-        List<ReleaseGroup> result = musicService.getAlbumsForArtist(artist);
+        AlbumLoadResult result = musicService.getAlbumsForArtist(artist);
 
-        assertEquals(1, result.size());
-        assertEquals("The Dark Side of the Moon", result.getFirst().getTitle());
+        assertEquals(1, result.albums().size());
+        assertEquals("The Dark Side of the Moon", result.albums().getFirst().getTitle());
         verifyNoInteractions(paginationService);
     }
 
@@ -56,11 +56,11 @@ class MusicServiceTest {
         when(databaseService.areAlbumsFetched("artist-123")).thenReturn(false);
         when(paginationService.getAllAlbumsByArtist("artist-123")).thenReturn(response);
 
-        List<ReleaseGroup> result = musicService.getAlbumsForArtist(artist);
+        AlbumLoadResult result = musicService.getAlbumsForArtist(artist);
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("The Dark Side of the Moon", result.getFirst().getTitle());
+        assertEquals(1, result.albums().size());
+        assertEquals("The Dark Side of the Moon", result.albums().getFirst().getTitle());
         verify(databaseService, times(1)).saveArtistWithAlbums(artist, albums);
         verify(paginationService, times(1)).getAllAlbumsByArtist("artist-123");
     }
@@ -76,7 +76,7 @@ class MusicServiceTest {
         when(databaseService.areAlbumsFetched("artist-123")).thenReturn(false);
         when(paginationService.getAllAlbumsByArtist("artist-123")).thenReturn(null);
 
-        List<ReleaseGroup> result = musicService.getAlbumsForArtist(artist);
+        AlbumLoadResult result = musicService.getAlbumsForArtist(artist);
 
         assertNull(result);
         verify(databaseService, never()).saveArtistWithAlbums(any(), any());
