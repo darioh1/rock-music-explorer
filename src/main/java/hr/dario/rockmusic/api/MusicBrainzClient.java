@@ -7,17 +7,25 @@ import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hr.dario.rockmusic.model.ArtistSearchResponse;
-import hr.dario.rockmusic.model.ReleaseGroup;
 import hr.dario.rockmusic.model.ReleaseGroupResponse;
 
 public class MusicBrainzClient {
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final HttpClient client = HttpClient.newHttpClient();
+    private final HttpClient client;
+    private final long retryDelayMillis;
+
+    public MusicBrainzClient() {
+        this(HttpClient.newHttpClient(), 2000);
+    }
+
+    public MusicBrainzClient(HttpClient client, long retryDelayMillis) {
+        this.client = client;
+        this.retryDelayMillis = retryDelayMillis;
+    }
+
     public ArtistSearchResponse searchArtist(String artistName){
         String encodedArtistName = URLEncoder.encode(artistName, StandardCharsets.UTF_8);
         String url = "https://musicbrainz.org/ws/2/artist/?query=artist:"
@@ -29,10 +37,7 @@ public class MusicBrainzClient {
                 .GET()
                 .build();
         try {
-            HttpResponse<String> response = client.send(
-                    request,
-                    HttpResponse.BodyHandlers.ofString()
-            );
+            HttpResponse<String> response = sendRequestWithRetry(request);
             if (response.statusCode() != 200) {
                 System.out.println("MusicBrainz returned status code: " + response.statusCode());
                 return null;
@@ -67,10 +72,7 @@ public class MusicBrainzClient {
                 .GET()
                 .build();
         try {
-            HttpResponse<String> response = client.send(
-                    request,
-                    HttpResponse.BodyHandlers.ofString()
-            );
+            HttpResponse<String> response = sendRequestWithRetry(request);
             if (response.statusCode() != 200) {
                 System.out.println("MusicBrainz returned status code: " + response.statusCode());
                 return null;
@@ -90,5 +92,35 @@ public class MusicBrainzClient {
             System.out.println("Request to MusicBrainz was interrupted.");
             return null;
         }
+    }
+
+    private HttpResponse<String> sendRequestWithRetry(HttpRequest request)
+            throws IOException, InterruptedException {
+
+        int maxAttempts = 3;
+        int attempt = 0;
+        HttpResponse<String> response = null;
+
+        while (attempt < maxAttempts) {
+            attempt++;
+            response = client.send(
+                    request,
+                    HttpResponse.BodyHandlers.ofString()
+            );
+            int statusCode = response.statusCode();
+
+            if (statusCode == 200) {
+                return response;
+            }
+
+            if (statusCode != 503 && statusCode != 429) {
+                return response;
+            }
+
+            if (attempt < maxAttempts) {
+                Thread.sleep(retryDelayMillis);
+            }
+        }
+        return response;
     }
 }
